@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+}
+
+model Event {
+  id               String      @id @default(cuid())
+  slug             String      @unique
+  name             String
+  description      String      @db.Text
+  trackName        String
+  eventDate        DateTime
+  capacity         Int
+  status           EventStatus @default(PUBLISHED)
+  discordMessageId String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@index([eventDate])
+}
+
+model NewsPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  excerpt     String
+  body        String   @db.Text
+  published   Boolean  @default(true)
+  publishedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model DiscordServerSnapshot {
+  id           String   @id @default("primary")
+  guildId      String?
+  name         String
+  iconUrl      String?
+  inviteUrl    String?
+  memberCount  Int      @default(0)
+  onlineCount  Int      @default(0)
+  description  String?
+  lastSyncedAt DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model DriverProfile {
+  id          String       @id @default(cuid())
+  steamId     String?      @unique
+  displayName String
+  countryCode String?
+  ranking     Int
+  kmr         Int
+  paceScore   Float
+  consistency Float
+  bestLapMs   Int?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  races       RaceResult[]
+
+  @@index([ranking])
+}
+
+model RaceResult {
+  id             String        @id @default(cuid())
+  driverId       String
+  trackName      String
+  carName        String
+  position       Int
+  incidentPoints Int
+  lapTimeMs      Int?
+  totalTimeMs    Int?
+  finishedAt     DateTime
+  driver         DriverProfile @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  @@index([finishedAt])
+}
+
+model ServerSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
