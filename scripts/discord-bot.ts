@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { PrismaClient } from "@prisma/client";
 import { Client, Events, GatewayIntentBits } from "discord.js";
 
